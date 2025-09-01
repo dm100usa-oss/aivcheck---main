@@ -3,9 +3,6 @@
 import React from "react";
 import ReportLayout, { CheckItem } from "../../components/ReportLayout";
 
-// 👇 эта строка обязательна
-export const dynamic = "force-dynamic";
-
 export default function SuccessPage() {
   const testItems: CheckItem[] = [
     { name: "robots.txt", status: "Poor", explanation: "File missing or blocks AI access" },
