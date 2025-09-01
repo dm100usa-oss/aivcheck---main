@@ -1,28 +1,20 @@
+"use client";
+
 import React from "react";
 
-interface DonutProps {
-  score: number;
-}
-
-function getColor(score: number) {
-  if (score < 31) return "text-red-500";
-  if (score < 61) return "text-yellow-500";
-  return "text-green-500";
-}
-
-const Donut: React.FC<DonutProps> = ({ score }) => {
+export default function Donut({ value }: { value: number }) {
   const radius = 50;
-  const stroke = 10;
+  const stroke = 8;
   const normalizedRadius = radius - stroke * 2;
   const circumference = normalizedRadius * 2 * Math.PI;
   const strokeDashoffset =
-    circumference - (score / 100) * circumference;
+    circumference - (value / 100) * circumference;
 
   return (
-    <div className="flex flex-col items-center">
+    <div className="relative inline-flex items-center justify-center">
       <svg height={radius * 2} width={radius * 2}>
         <circle
-          stroke="#e5e7eb" // серый фон (Tailwind gray-200)
+          stroke="#e5e7eb"
           fill="transparent"
           strokeWidth={stroke}
           r={normalizedRadius}
@@ -30,21 +22,19 @@ const Donut: React.FC<DonutProps> = ({ score }) => {
           cy={radius}
         />
         <circle
-          stroke="currentColor"
-          className={getColor(score)}
+          stroke={value >= 75 ? "#22c55e" : value >= 50 ? "#facc15" : "#ef4444"}
           fill="transparent"
           strokeWidth={stroke}
-          strokeDasharray={circumference + " " + circumference}
-          strokeDashoffset={strokeDashoffset}
-          strokeLinecap="round"
+          strokeDasharray={`${circumference} ${circumference}`}
+          style={{ strokeDashoffset, transition: "stroke-dashoffset 0.35s" }}
           r={normalizedRadius}
           cx={radius}
           cy={radius}
         />
       </svg>
-      <div className="mt-2 text-xl font-semibold">{score}%</div>
+      <span className="absolute text-lg font-semibold text-neutral-700">
+        {value}%
+      </span>
     </div>
   );
-};
-
-export default Donut;
+}
