@@ -1,38 +1,43 @@
-// /app/success/page.tsx
 "use client";
 
 import React from "react";
-import ReportLayout from "../../components/ReportLayout";
-import { CheckItem } from "../../types";
+import ReportLayout, { CheckItem } from "../../components/ReportLayout";
 
 export default function SuccessPage() {
-  // Example full check items (Pro, 15 points)
   const testItems: CheckItem[] = [
-    { name: "robots.txt", status: "Good", explanation: "The file is valid and does not block AI." },
-    { name: "sitemap.xml", status: "Moderate", explanation: "Sitemap exists but does not cover all pages." },
-    { name: "X-Robots-Tag", status: "Good", explanation: "Headers allow AI indexing." },
-    { name: "Meta robots", status: "Poor", explanation: "Some pages block indexing with noindex." },
-    { name: "Canonical", status: "Good", explanation: "Canonical tags are correctly configured." },
-    { name: "Title", status: "Good", explanation: "Titles are clear and unique." },
-    { name: "Meta description", status: "Moderate", explanation: "Some pages have missing or duplicate descriptions." },
-    { name: "Open Graph", status: "Good", explanation: "OG tags are set correctly." },
-    { name: "H1", status: "Moderate", explanation: "Some pages have missing or duplicate H1 tags." },
-    { name: "Structured Data", status: "Poor", explanation: "Structured data is missing on important pages." },
-    { name: "Mobile friendly", status: "Good", explanation: "The site is mobile-friendly." },
-    { name: "HTTPS", status: "Good", explanation: "SSL is enabled and valid." },
-    { name: "Alt texts", status: "Moderate", explanation: "Some images lack alt attributes." },
-    { name: "Favicon", status: "Good", explanation: "Favicon is present." },
-    { name: "404 page", status: "Good", explanation: "Custom 404 page works correctly." },
+    { name: "robots.txt", status: "Poor", explanation: "File missing or blocks AI access" },
+    { name: "sitemap.xml", status: "Good", explanation: "Sitemap found and valid" },
+    { name: "X-Robots-Tag", status: "Good", explanation: "Header allows indexing" },
+    { name: "Meta robots", status: "Good", explanation: "Proper meta robots tag" },
+    { name: "Canonical", status: "Good", explanation: "Canonical tag is present" },
+    { name: "Title", status: "Good", explanation: "Title is clear and unique" },
+    { name: "Meta description", status: "Poor", explanation: "Missing or duplicated description" },
+    { name: "Open Graph", status: "Good", explanation: "OG tags are implemented" },
+    { name: "H1", status: "Good", explanation: "Main H1 heading is valid" },
+    { name: "Structured Data", status: "Moderate", explanation: "No JSON-LD schema found" },
+    { name: "Mobile friendly", status: "Good", explanation: "Mobile-friendly design" },
+    { name: "HTTPS", status: "Good", explanation: "SSL certificate is valid" },
+    { name: "Alt texts", status: "Good", explanation: "Images have alt attributes" },
+    { name: "Favicon", status: "Good", explanation: "Favicon is present" },
+    { name: "404 page", status: "Good", explanation: "Custom 404 page is working" },
   ];
 
   return (
     <main className="min-h-screen bg-gray-50 flex items-center justify-center p-6">
-      <ReportLayout
-        mode="pro"
-        score={72}
-        interpretation="Moderate visibility"
-        items={testItems}
-      />
+      <div>
+        <h1 className="mb-6 text-center text-2xl font-semibold">
+          Your result is ready
+        </h1>
+        <ReportLayout
+          mode="pro"
+          score={62}
+          interpretation="Moderate visibility"
+          items={testItems}
+        />
+        <div className="mt-6 text-center text-sm text-emerald-700">
+          Payment confirmed. Your full report with technical recommendations has been sent to your email.
+        </div>
+      </div>
     </main>
   );
 }
