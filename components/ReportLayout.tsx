@@ -1,8 +1,5 @@
 "use client";
 
-import React from "react";
-import Donut from "./Donut";
-
 export type CheckItem = {
   name: string;
   status: "Good" | "Moderate" | "Poor";
@@ -21,35 +18,28 @@ export default function ReportLayout({
   items: CheckItem[];
 }) {
   return (
-    <div className="w-full max-w-2xl mx-auto bg-white rounded-xl shadow-sm p-6">
-      {mode === "pro" && score !== undefined && (
+    <div className="rounded-lg bg-white shadow p-6">
+      {score !== undefined && (
         <div className="mb-6 text-center">
-          <Donut value={score} />
-          <p className="mt-3 text-lg font-medium text-neutral-700">
-            {interpretation}
-          </p>
+          <div className="text-4xl font-bold">{score}%</div>
+          <div className="text-sm text-gray-500">{interpretation}</div>
         </div>
       )}
 
-      <ul className="space-y-3">
+      <ul className="space-y-2">
         {items.map((item, i) => (
           <li
             key={i}
-            className="flex items-start justify-between rounded-md border px-3 py-2"
+            className="flex justify-between items-start border-b pb-2 last:border-0"
           >
-            <div>
-              <p className="font-medium">{item.name}</p>
-              {mode === "pro" && item.explanation && (
-                <p className="text-xs text-neutral-500">{item.explanation}</p>
-              )}
-            </div>
+            <span className="font-medium">{item.name}</span>
             <span
-              className={`ml-4 inline-flex items-center rounded-full px-2 py-1 text-xs font-semibold ${
+              className={`text-sm ${
                 item.status === "Good"
-                  ? "bg-emerald-100 text-emerald-700"
+                  ? "text-emerald-600"
                   : item.status === "Moderate"
-                  ? "bg-amber-100 text-amber-700"
-                  : "bg-rose-100 text-rose-700"
+                  ? "text-amber-600"
+                  : "text-rose-600"
               }`}
             >
               {item.status}
@@ -60,4 +50,3 @@ export default function ReportLayout({
     </div>
   );
 }
-
