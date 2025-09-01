@@ -3,8 +3,6 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import ReportLayout from "../../../components/ReportLayout";
-import { CheckItem } from "../../../types";
 
 type Mode = "quick" | "pro";
 
@@ -17,7 +15,7 @@ export default function PreviewPage({
 }) {
   const mode = (params.mode as Mode) || "quick";
   const url = (searchParams?.url || "").trim();
-  const status = (searchParams?.status || "ok").toLowerCase(); // "ok" | "error"
+  const status = (searchParams?.status || "ok").toLowerCase();
   const paid = (searchParams?.paid || "") === "1";
   const router = useRouter();
 
@@ -25,16 +23,36 @@ export default function PreviewPage({
     mode === "quick"
       ? "bg-blue-600 hover:bg-blue-700 text-white"
       : "bg-green-600 hover:bg-green-700 text-white";
-  const dot = mode === "quick" ? "bg-blue-600" : "bg-green-600";
 
-  // demo test data
-  const testItems: CheckItem[] = [
-    { name: "Robots.txt", status: "Poor", explanation: "File missing or blocks AI access" },
-    { name: "Sitemap.xml", status: "Good", explanation: "Sitemap found and valid" },
-    { name: "Title tag", status: "Good", explanation: "Title is clear and unique" },
-    { name: "Meta description", status: "Poor", explanation: "Missing or duplicated description" },
-    { name: "Structured Data", status: "Moderate", explanation: "No JSON-LD schema found" },
-  ];
+  const items = useMemo(
+    () =>
+      mode === "quick"
+        ? [
+            "AI Visibility",
+            "AI Readability of Text",
+            "AI Access to Key Pages",
+            "Up-to-Date Information for AI",
+            "AI-Friendly Page Structure",
+          ]
+        : [
+            "robots.txt",
+            "sitemap.xml",
+            "X-Robots-Tag",
+            "Meta robots",
+            "Canonical",
+            "Title",
+            "Meta description",
+            "Open Graph",
+            "H1",
+            "Structured Data",
+            "Mobile friendly",
+            "HTTPS",
+            "Alt texts",
+            "Favicon",
+            "404 page",
+          ],
+    [mode]
+  );
 
   const [email, setEmail] = useState("");
   const emailValid =
@@ -68,66 +86,53 @@ export default function PreviewPage({
 
           {status === "ok" ? (
             <>
-              {!paid ? (
-                <>
-                  <ul className="mb-6 space-y-3">
-                    {["AI Visibility", "AI Readability of Text", "AI Access to Key Pages", "Up-to-Date Information for AI", "AI-Friendly Page Structure"].map(
-                      (t, i) => (
-                        <li key={i} className="flex items-center">
-                          <span
-                            className={`mr-3 inline-block h-3 w-3 rounded-full ${dot}`}
-                            aria-hidden="true"
-                          />
-                          <span className="text-[15px]">{t}</span>
-                        </li>
-                      )
-                    )}
-                  </ul>
+              <ul className="mb-6 space-y-3">
+                {items.map((t, i) => (
+                  <li key={i} className="flex items-center">
+                    <span
+                      className={`mr-3 inline-block h-3 w-3 rounded-full ${
+                        mode === "quick" ? "bg-blue-600" : "bg-green-600"
+                      }`}
+                      aria-hidden="true"
+                    />
+                    <span className="text-[15px]">{t}</span>
+                  </li>
+                ))}
+              </ul>
 
-                  {mode === "pro" && (
-                    <div className="mb-4">
-                      <label htmlFor="email" className="mb-1 block text-sm text-neutral-700">
-                        Your email to receive the PDF after payment
-                      </label>
-                      <input
-                        id="email"
-                        type="email"
-                        placeholder="you@example.com"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        className={[
-                          "w-full rounded-md border px-3 py-2 text-sm outline-none",
-                          email || !emailValid
-                            ? emailValid
-                              ? "border-neutral-300 focus:ring-2 focus:ring-green-500"
-                              : "border-rose-400 focus:ring-2 focus:ring-rose-300"
-                            : "border-neutral-300 focus:ring-2 focus:ring-green-500",
-                        ].join(" ")}
-                      />
-                      {!emailValid && (
-                        <p className="mt-1 text-xs text-rose-600">Please enter a valid email.</p>
-                      )}
-                    </div>
+              {mode === "pro" && !paid && (
+                <div className="mb-4">
+                  <label htmlFor="email" className="mb-1 block text-sm text-neutral-700">
+                    Your email to receive the PDF after payment
+                  </label>
+                  <input
+                    id="email"
+                    type="email"
+                    placeholder="you@example.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="w-full rounded-md border px-3 py-2 text-sm outline-none border-neutral-300 focus:ring-2 focus:ring-green-500"
+                  />
+                  {!emailValid && (
+                    <p className="mt-1 text-xs text-rose-600">Please enter a valid email.</p>
                   )}
+                </div>
+              )}
 
-                  <button
-                    onClick={pay}
-                    disabled={!url || (mode === "pro" && !emailValid)}
-                    className={[
-                      "w-full rounded-md px-4 py-3 text-base font-medium transition-colors disabled:opacity-60",
-                      color,
-                    ].join(" ")}
-                  >
-                    Pay & Get {mode === "pro" ? "Full Report" : "Results"}
-                  </button>
-                </>
+              {!paid ? (
+                <button
+                  onClick={pay}
+                  disabled={!url || (mode === "pro" && !emailValid)}
+                  className={`w-full rounded-md px-4 py-3 text-base font-medium transition-colors disabled:opacity-60 ${color}`}
+                >
+                  Pay & Get {mode === "pro" ? "Full Report" : "Results"}
+                </button>
               ) : (
-                <ReportLayout
-                  mode={mode}
-                  score={62}
-                  interpretation="Moderate visibility"
-                  items={testItems}
-                />
+                <div className="rounded-md border border-emerald-200 bg-emerald-50 p-4 text-center text-sm text-emerald-800">
+                  {mode === "pro"
+                    ? "Payment confirmed. Your full report with technical recommendations has been sent to your email."
+                    : "Payment confirmed. Your quick results are now unlocked."}
+                </div>
               )}
 
               <p className="mt-6 text-center text-xs text-neutral-500">
