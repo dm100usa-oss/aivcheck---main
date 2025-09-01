@@ -1,6 +1,5 @@
-// /types.ts
 export type CheckItem = {
   name: string;
-  status: "Passed" | "Failed";
+  status: "Good" | "Moderate" | "Poor";
   explanation: string;
 };
