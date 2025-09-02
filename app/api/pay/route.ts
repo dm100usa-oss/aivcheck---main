@@ -1,54 +1,45 @@
-// app/api/pay/route.ts
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import Stripe from "stripe";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
   apiVersion: "2024-06-20",
 });
 
-function getBaseUrl(req: NextRequest) {
-  const host = req.headers.get("x-forwarded-host") || req.headers.get("host") || "";
-  const proto = req.headers.get("x-forwarded-proto") || "https";
-  return `${proto}://${host}`;
-}
-
-export async function POST(req: NextRequest) {
+export async function POST(req: Request) {
   try {
-    const { mode, url, email } = await req.json();
-    if (mode !== "quick" && mode !== "pro") {
-      return NextResponse.json({ error: "Bad mode" }, { status: 400 });
-    }
-    if (!url || typeof url !== "string") {
-      return NextResponse.json({ error: "Missing url" }, { status: 400 });
-    }
+    const { mode, email } = await req.json();
 
+    // Определяем цену в зависимости от тарифа
     const priceId =
-      mode === "quick"
-        ? process.env.STRIPE_PRICE_QUICK
-        : process.env.STRIPE_PRICE_FULL;
+      mode === "pro"
+        ? process.env.STRIPE_PRICE_PRO // $19.99
+        : process.env.STRIPE_PRICE_QUICK; // $9.99
 
     if (!priceId) {
-      return NextResponse.json({ error: "Price ID not configured" }, { status: 500 });
+      return NextResponse.json(
+        { error: "Price ID is not configured" },
+        { status: 400 }
+      );
     }
 
-    const base = getBaseUrl(req);
-
-    // После оплаты возвращаем сразу на страницу результатов:
-    const successUrl = `${base}/preview/${mode}?url=${encodeURIComponent(
-      url
-    )}&status=ok&paid=1`;
-
+    // Создаём checkout-сессию
     const session = await stripe.checkout.sessions.create({
+      payment_method_types: ["card"],
       mode: "payment",
-      line_items: [{ price: priceId, quantity: 1 }],
-      success_url: successUrl,
-      cancel_url: `${base}/`,
-      customer_email: mode === "pro" && email ? email : undefined,
-      metadata: { url, mode, email: email || "" },
+      customer_email: email || undefined,
+      line_items: [
+        {
+          price: priceId,
+          quantity: 1,
+        },
+      ],
+      success_url: `${process.env.NEXT_PUBLIC_BASE_URL}/success?mode=${mode}`,
+      cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL}/`,
     });
 
-    return NextResponse.json({ url: session.url });
-  } catch (e: any) {
-    return NextResponse.json({ error: e?.message ?? "Stripe error" }, { status: 500 });
+    return NextResponse.json({ id: session.id });
+  } catch (err: any) {
+    console.error("Stripe error:", err.message);
+    return NextResponse.json({ error: "Stripe session error" }, { status: 500 });
   }
 }
