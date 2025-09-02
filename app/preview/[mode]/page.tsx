@@ -2,15 +2,45 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { loadStripe } from "@stripe/stripe-js";
 
 type Mode = "quick" | "pro";
 
+const stripePromise = loadStripe(
+  process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!
+);
+
 const quickParams = [
-  { id: 1, name: "robots.txt", description: "Если файл закрывает сайт, он может полностью исчезнуть из поиска ИИ." },
-  { id: 2, name: "sitemap.xml", description: "Карта сайта показывает, какие страницы учитывать, если её нет — часть страниц невидима." },
-  { id: 3, name: "X-Robots-Tag", description: "Если заголовки запрещают индексацию, сайт не попадает в поиск." },
-  { id: 4, name: "Meta robots", description: "Если мета-теги закрывают страницу, она не появляется в результатах." },
-  { id: 5, name: "Canonical", description: "Если не указана основная версия страницы, ИИ может показывать дубликаты." },
+  {
+    id: 1,
+    name: "robots.txt",
+    description:
+      "If this file blocks access, your site may completely disappear from AI search results.",
+  },
+  {
+    id: 2,
+    name: "sitemap.xml",
+    description:
+      "The sitemap shows AI which pages to index. If missing, some pages remain invisible.",
+  },
+  {
+    id: 3,
+    name: "X-Robots-Tag",
+    description:
+      "If headers are misconfigured and block indexing, your site will not appear in AI results.",
+  },
+  {
+    id: 4,
+    name: "Meta robots",
+    description:
+      "If meta tags block indexing, the page won’t appear in AI results.",
+  },
+  {
+    id: 5,
+    name: "Canonical",
+    description:
+      "If the main version is not specified, AI may show duplicates or secondary pages.",
+  },
 ];
 
 const proParams = [
@@ -44,17 +74,29 @@ export default function PreviewPage({
   const [email, setEmail] = useState("");
   const [error, setError] = useState<string | null>(null);
 
-  const handlePay = () => {
+  const validateEmail = (value: string) => {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+  };
+
+  const handleCheckout = async () => {
     if (mode === "pro" && !validateEmail(email)) {
       setError("Invalid email address. Please try again.");
       return;
     }
     setError(null);
-    router.push("/success?mode=" + mode);
-  };
 
-  const validateEmail = (value: string) => {
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+    const stripe = await stripePromise;
+
+    const res = await fetch("/api/pay", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ mode, email }),
+    });
+
+    const session = await res.json();
+    if (session.id) {
+      stripe?.redirectToCheckout({ sessionId: session.id });
+    }
   };
 
   if (searchParams?.status === "error") {
@@ -76,7 +118,9 @@ export default function PreviewPage({
   return (
     <div className="max-w-2xl mx-auto py-12 px-4">
       <h1 className="text-2xl font-bold mb-6">
-        {mode === "quick" ? "Your site has been checked" : "Full site audit preview"}
+        {mode === "quick"
+          ? "Your site has been checked"
+          : "Full site audit preview"}
       </h1>
 
       {mode === "quick" ? (
@@ -116,10 +160,10 @@ export default function PreviewPage({
       )}
 
       <button
-        onClick={handlePay}
+        onClick={handleCheckout}
         className={`mt-8 w-full py-3 rounded-xl text-white ${
           mode === "quick"
-            ? "bg-gradient-to-r from-blue-500 to-blue-600"
+            ? "bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700"
             : "bg-green-600 hover:bg-green-700"
         }`}
       >
