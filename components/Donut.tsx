@@ -1,40 +1,28 @@
 "use client";
 
-import React from "react";
+import { CircularProgressbar, buildStyles } from "react-circular-progressbar";
+import "react-circular-progressbar/dist/styles.css";
 
 export default function Donut({ value }: { value: number }) {
-  const radius = 50;
-  const stroke = 8;
-  const normalizedRadius = radius - stroke * 2;
-  const circumference = normalizedRadius * 2 * Math.PI;
-  const strokeDashoffset =
-    circumference - (value / 100) * circumference;
+  let color = "#f87171"; // red by default
+  if (value >= 80) {
+    color = "#22c55e"; // green
+  } else if (value >= 40) {
+    color = "#eab308"; // yellow
+  }
 
   return (
-    <div className="relative inline-flex items-center justify-center">
-      <svg height={radius * 2} width={radius * 2}>
-        <circle
-          stroke="#e5e7eb"
-          fill="transparent"
-          strokeWidth={stroke}
-          r={normalizedRadius}
-          cx={radius}
-          cy={radius}
-        />
-        <circle
-          stroke={value >= 75 ? "#22c55e" : value >= 50 ? "#facc15" : "#ef4444"}
-          fill="transparent"
-          strokeWidth={stroke}
-          strokeDasharray={`${circumference} ${circumference}`}
-          style={{ strokeDashoffset, transition: "stroke-dashoffset 0.35s" }}
-          r={normalizedRadius}
-          cx={radius}
-          cy={radius}
-        />
-      </svg>
-      <span className="absolute text-lg font-semibold text-neutral-700">
-        {value}%
-      </span>
+    <div className="w-40 h-40">
+      <CircularProgressbar
+        value={value}
+        text={`${value}%`}
+        styles={buildStyles({
+          textColor: "#111827",
+          pathColor: color,
+          trailColor: "#e5e7eb",
+          textSize: "16px",
+        })}
+      />
     </div>
   );
 }
